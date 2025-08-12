@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './NbaPlayerSelection.module.css';
 
+const BACKEND_BASE_URL = 'https://fantasy-predictor.onrender.com';
+
 const allTeams = [
   'ATL', 'BOS', 'BKN', 'CHA', 'CHI', 'CLE', 'DAL', 'DEN', 'DET',
   'GSW', 'HOU', 'IND', 'LAC', 'LAL', 'MEM', 'MIA', 'MIL', 'MIN',
@@ -26,7 +28,7 @@ function PlayerSearch({ onSelect }) {
 
     const controller = new AbortController();
 
-    fetch(`/api/player?name=${encodeURIComponent(query)}`, { signal: controller.signal })
+    fetch(`${BACKEND_BASE_URL}/api/player?name=${encodeURIComponent(query)}`, { signal: controller.signal })
       .then(async (res) => {
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -100,7 +102,7 @@ export default function NbaPlayerSelection() {
     setPrediction(null);
 
     try {
-      const res = await fetch('http://localhost:5000/predict', {
+      const res = await fetch(`${BACKEND_BASE_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

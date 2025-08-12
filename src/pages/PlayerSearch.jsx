@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+const BACKEND_BASE_URL = 'https://fantasy-predictor.onrender.com';
+
 export default function NBAPlayerSearch({ onSelect }) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -21,7 +23,7 @@ export default function NBAPlayerSearch({ onSelect }) {
       }
 
       try {
-        const res = await fetch(`/api/player?name=${encodeURIComponent(debouncedQuery)}`);
+        const res = await fetch(`${BACKEND_BASE_URL}/api/player?name=${encodeURIComponent(debouncedQuery)}`);
         if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         setPlayers(data.data || []);
