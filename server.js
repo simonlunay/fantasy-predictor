@@ -14,21 +14,16 @@ const __dirname = path.dirname(__filename);
 app.use(cors());
 app.use(express.json());
 
-// API routes (must come before static/catch-all)
+// API routes (must come BEFORE static/catch-all)
 app.use('/api/players', playerRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  // Root folder since index.html is in root
   app.use(express.static(__dirname));
 
-  // Catch-all for React SPA (ignore API routes)
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, 'index.html'));
-    } else {
-      res.status(404).json({ error: 'API route not found' });
-    }
+  // Catch-all: send index.html for React routes, ignore /api routes
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {
@@ -36,6 +31,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
