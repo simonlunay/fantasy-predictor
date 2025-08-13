@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // API routes (must come BEFORE static/catch-all)
-app.use('/api/player', playerRoutes);
+app.use('/api/players', playerRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
