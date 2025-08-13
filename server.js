@@ -3,13 +3,13 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import playerRoutes from './src/routes/players.js'; // Your own route file now
+import playerRoutes from './src/routes/players.js'; // your route file
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
+app.use(cors());           // Allow requests from any origin
+app.use(express.json());   // Parse JSON bodies
 
 app.use('/api', playerRoutes);
 
