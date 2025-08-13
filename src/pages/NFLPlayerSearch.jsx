@@ -28,7 +28,7 @@ function PlayerSearch({ onSelect }) {
 
     const controller = new AbortController();
 
-    fetch(`${BACKEND_BASE_URL}/api/player_nfl?name=${encodeURIComponent(query)}`, { signal: controller.signal })
+    fetch(`${BACKEND_BASE_URL}/api/players/nfl?name=${encodeURIComponent(query)}`, { signal: controller.signal })
       .then(async (res) => {
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));

@@ -12,34 +12,34 @@ const __dirname = path.dirname(__filename);
 let nbaPlayersData = [];
 let nflPlayersData = [];
 
-// Load the player stats JSON once when server starts
+// Load JSON files on server start
 (async () => {
   try {
     const nbaDataPath = path.resolve(__dirname, '..', 'data', 'nba_player_stats_by_defense.json');
     const nbaJsonStr = await fs.readFile(nbaDataPath, 'utf-8');
     nbaPlayersData = JSON.parse(nbaJsonStr);
-    console.log(`Loaded ${nbaPlayersData.length} NBA players from JSON`);
+    console.log(`Loaded ${nbaPlayersData.length} NBA players`);
   } catch (err) {
-    console.error('Failed to load NBA players JSON:', err);
+    console.error('Failed to load NBA JSON:', err);
   }
 
   try {
     const nflDataPath = path.resolve(__dirname, '..', 'data', 'nfl_skill_players_2023_weekly_with_opponent.json');
     const nflJsonStr = await fs.readFile(nflDataPath, 'utf-8');
     nflPlayersData = JSON.parse(nflJsonStr);
-    console.log(`Loaded ${nflPlayersData.length} NFL players from JSON`);
+    console.log(`Loaded ${nflPlayersData.length} NFL players`);
   } catch (err) {
-    console.error('Failed to load NFL players JSON:', err);
+    console.error('Failed to load NFL JSON:', err);
   }
 })();
 
-// NBA player search route
-router.get('/player', (req, res) => {
+// ---------------------- NBA ----------------------
+router.get('/', (req, res) => {
   try {
     const searchTerm = req.query.name?.trim().toLowerCase();
 
     if (!searchTerm || searchTerm.length < 2) {
-      return res.json({ data: [] }); // Don't search until 2+ chars
+      return res.json({ data: [] });
     }
 
     const startsWithMatches = [];
@@ -47,7 +47,6 @@ router.get('/player', (req, res) => {
 
     for (const player of nbaPlayersData) {
       if (!player.player) continue;
-
       const name = player.player.toLowerCase();
 
       if (name.startsWith(searchTerm)) {
@@ -62,18 +61,18 @@ router.get('/player', (req, res) => {
     const result = [...startsWithMatches, ...includesMatches].slice(0, 20);
     res.json({ data: result });
   } catch (err) {
-    console.error('Error in /player route:', err);
+    console.error('NBA route error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// NFL player search route
-router.get('/player_nfl', (req, res) => {
+// ---------------------- NFL ----------------------
+router.get('/nfl', (req, res) => {
   try {
     const searchTerm = req.query.name?.trim().toLowerCase();
 
     if (!searchTerm || searchTerm.length < 2) {
-      return res.json({ data: [] }); // Don't search until 2+ chars
+      return res.json({ data: [] });
     }
 
     const startsWithMatches = [];
@@ -82,10 +81,8 @@ router.get('/player_nfl', (req, res) => {
 
     for (const player of nflPlayersData) {
       if (!player.player_name) continue;
-
       const name = player.player_name.toLowerCase();
-
-      if (seen.has(name)) continue; // Skip duplicates
+      if (seen.has(name)) continue;
 
       if (name.startsWith(searchTerm)) {
         startsWithMatches.push(player);
@@ -99,12 +96,11 @@ router.get('/player_nfl', (req, res) => {
     }
 
     const result = [...startsWithMatches, ...includesMatches].slice(0, 20);
-
     const playerNames = result.map(p => p.player_name);
 
     res.json({ data: playerNames });
   } catch (err) {
-    console.error('Error in /player_nfl route:', err);
+    console.error('NFL route error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
