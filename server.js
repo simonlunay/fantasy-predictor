@@ -20,7 +20,7 @@ app.use('/api/players', playerRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join(__dirname, 'public'); // frontend build folder
+  const buildPath = path.join(__dirname, '..'); // frontend build folder
   app.use(express.static(buildPath));
 
   app.get('*', (req, res) => {
