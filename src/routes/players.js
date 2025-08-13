@@ -109,6 +109,4 @@ router.get('/player_nfl', (req, res) => {
   }
 });
 
-
-
 export default router;

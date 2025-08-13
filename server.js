@@ -15,22 +15,20 @@ const __dirname = path.dirname(__filename);
 app.use(cors());
 app.use(express.json());
 
-// API routes
-app.use('/api/players', playerRoutes); // namespace routes under /api/players
+// API routes (only relative paths!)
+app.use('/api/players', playerRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
   const buildPath = path.join(__dirname, 'public'); // frontend build folder
   app.use(express.static(buildPath));
 
-  // Send index.html for all other routes (React SPA)
   app.get('*', (req, res) => {
     res.sendFile(path.join(buildPath, 'index.html'));
   });
 } else {
-  // Development root route
   app.get('/', (req, res) => {
-    res.send('NBA Player Search API is running (Development)');
+    res.send('NBA/NFL Player API running (Development)');
   });
 }
 
