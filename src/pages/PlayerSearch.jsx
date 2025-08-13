@@ -23,7 +23,7 @@ export default function NBAPlayerSearch({ onSelect }) {
       }
 
       try {
-        const res = await fetch(`${BACKEND_BASE_URL}/api/player?name=${encodeURIComponent(debouncedQuery)}`);
+        const res = await fetch(`${BACKEND_BASE_URL}/api/players?name=${encodeURIComponent(debouncedQuery)}`);
         if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         setPlayers(data.data || []);
