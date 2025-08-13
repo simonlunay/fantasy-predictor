@@ -14,18 +14,21 @@ const __dirname = path.dirname(__filename);
 app.use(cors());
 app.use(express.json());
 
-// API routes
+// API routes (must come before static/catch-all)
 app.use('/api/players', playerRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  // Make sure this points to your **frontend build folder**, e.g., 'public' or 'frontend/dist'
-  const buildPath = path.join(__dirname, 'public'); // ← change 'public' if your build folder is different
-  app.use(express.static(buildPath));
+  // Root folder since index.html is in root
+  app.use(express.static(__dirname));
 
-  // Catch-all route for React SPA
+  // Catch-all for React SPA (ignore API routes)
   app.get('*', (req, res) => {
-    res.sendFile(path.join(buildPath, 'index.html'));
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, 'index.html'));
+    } else {
+      res.status(404).json({ error: 'API route not found' });
+    }
   });
 } else {
   app.get('/', (req, res) => {
