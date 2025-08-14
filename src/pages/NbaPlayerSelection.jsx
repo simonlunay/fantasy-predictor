@@ -102,7 +102,7 @@ export default function NbaPlayerSelection() {
     setPrediction(null);
 
     try {
-      const res = await fetch(`${BACKEND_BASE_URL}/predict`, {
+      const res = await fetch(`${BACKEND_BASE_URL}/api/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
