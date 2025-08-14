@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import NFLPlayerSearch from './NFLPlayerSearch';
 import styles from './NflPlayerSelection.module.css';
 
@@ -12,9 +12,7 @@ function formatLabel(str) {
   };
 
   const lowerStr = str.toLowerCase();
-  if (specialCases[lowerStr]) {
-    return specialCases[lowerStr];
-  }
+  if (specialCases[lowerStr]) return specialCases[lowerStr];
 
   return str
     .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -24,88 +22,135 @@ function formatLabel(str) {
     );
 }
 
-export default function NflPlayerSelection() {
-  // ... your existing state and functions ...
+const allTeams = [
+  'BUF','KC','PHI','SF','PIT','JAX','BAL','LAR','NE','GB','MIN','NO','SEA',
+  'TEN','CIN','CLE','MIA','IND','ARI','LV','NYG','DET','ATL','HOU','CAR','WAS',
+  'DEN','CHI','TB','LAC','NYJ','DAL'
+];
 
-  useEffect(() => {
-    if (!selectedPlayer) {
-      setPlayerInfo(null);
-      setNextGame(null);
-      setPrediction(null);
-      setError('');
+export default function NflPlayerSelection() {
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [opponent, setOpponent] = useState('');
+  const [homeAway, setHomeAway] = useState('home');
+  const [prediction, setPrediction] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handlePredict = async () => {
+    if (!selectedPlayer || !opponent) {
+      setError('Please select player and opponent');
       return;
     }
 
-    async function fetchData() {
-      setLoading(true);
-      setError('');
-      setPrediction(null);
+    setLoading(true);
+    setError('');
+    setPrediction(null);
 
-      try {
-        // Use full backend URL here
-        const playerRes = await fetch(
-          `${BACKEND_BASE_URL}/api/player?name=${encodeURIComponent(selectedPlayer)}`
-        );
-        if (!playerRes.ok) throw new Error('Failed to fetch player data');
-        const playerData = await playerRes.json();
-        const player = playerData.data?.[0];
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/api/predict_nfl`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player: selectedPlayer,
+          opponent,
+          home_away: homeAway,
+        }),
+      });
 
-        if (!player) {
-          setError('Player not found in API');
-          setLoading(false);
-          return;
-        }
-
-        setPlayerInfo(player);
-
-        const gameRes = await fetch(
-          `${BACKEND_BASE_URL}/api/team-next-game?teamId=${player.team?.id}`
-        );
-        if (!gameRes.ok) throw new Error('Failed to fetch next game data');
-        const gameData = await gameRes.json();
-
-        if (!gameData.data || gameData.data.length === 0) {
-          setError("No upcoming games found for this player's team");
-          setNextGame(null);
-          setLoading(false);
-          return;
-        }
-
-        const game = gameData.data[0];
-        setNextGame(game);
-
-        const isHome = game.home_team?.id === player.team?.id;
-        const opponent = isHome
-          ? game.visitor_team?.abbreviation
-          : game.home_team?.abbreviation;
-        const homeAway = isHome ? 'home' : 'away';
-
-        const predRes = await fetch(`${BACKEND_BASE_URL}/api/predict_nfl`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            player: selectedPlayer,
-            opponent,
-            home_away: homeAway,
-          }),
-        });
-
-        if (!predRes.ok) {
-          const errData = await predRes.json();
-          throw new Error(errData.error || 'Failed to fetch prediction');
-        }
-
-        const predData = await predRes.json();
-        setPrediction(predData);
-      } catch (err) {
-        console.error(err);
-        setError(err.message || 'Failed to fetch data');
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || res.statusText);
       }
 
+      const data = await res.json();
+      setPrediction(data);
+    } catch (err) {
+      setError(err.message || 'Failed to fetch prediction');
+    } finally {
       setLoading(false);
     }
+  };
 
-    fetchData();
-  }, [selectedPlayer]);
+  return (
+    <div className={styles.container}>
+      {!selectedPlayer ? (
+        <NFLPlayerSearch onSelect={setSelectedPlayer} />
+      ) : (
+        <>
+          <h3 className={styles.title}>Selected Player: {selectedPlayer}</h3>
 
+          <div className={styles.inputGroup}>
+            <label htmlFor="opponent">Select Opponent Team:</label>
+            <select
+              id="opponent"
+              value={opponent}
+              onChange={(e) => setOpponent(e.target.value)}
+            >
+              <option value="">-- Select Team --</option>
+              {allTeams.map((team) => (
+                <option key={team} value={team}>{team}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label>Home or Away:</label>
+            <label>
+              <input
+                type="radio"
+                name="homeAway"
+                value="home"
+                checked={homeAway === 'home'}
+                onChange={() => setHomeAway('home')}
+              />
+              Home
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="homeAway"
+                value="away"
+                checked={homeAway === 'away'}
+                onChange={() => setHomeAway('away')}
+              />
+              Away
+            </label>
+          </div>
+
+          <button onClick={handlePredict} disabled={loading}>
+            {loading ? 'Predicting...' : 'Predict Stats'}
+          </button>
+
+          {error && <p className={styles.error}>{error}</p>}
+
+          {prediction && (
+            <div className={styles.predictionBox}>
+              <h4>Predicted Stats</h4>
+              <ul>
+                {Object.entries(prediction.predicted_stats || {}).map(([stat, val]) => (
+                  <li key={stat}>
+                    <strong>{formatLabel(stat)}:</strong> {val.toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+              <p><strong>Fantasy Points:</strong> {prediction.predicted_fantasy_points}</p>
+            </div>
+          )}
+
+          <button
+            className={styles.backButton}
+            onClick={() => {
+              setSelectedPlayer(null);
+              setPrediction(null);
+              setError('');
+              setOpponent('');
+              setHomeAway('home');
+            }}
+          >
+            Back to Search
+          </button>
+        </>
+      )}
+    </div>
+  );
 }
