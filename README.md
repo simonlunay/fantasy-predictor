@@ -1,12 +1,12 @@
-# React + Vite
+# AI Stat/Fantasy Predictor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The AI Stat/Fantasy Predictor is a web application that forecasts player performance for fantasy sports. Using Python and Scikit-learn for machine learning, it predicts player stats with a small margin of error to help users make data-driven decisions for their drafts.  
 
-Currently, two official plugins are available:
+The application features a dynamic React frontend and an Express backend API, allowing users to input player data and instantly receive predictions. This tool combines AI, web development, and interactive data visualization to provide a professional and user-friendly fantasy sports assistant.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live Demo:** [https://fantasy-predictor-pi.vercel.app/]
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Tech Stack:**  
+- Frontend: React, HTML, CSS, JavaScript  
+- Backend: Node.js, Express  
+- Machine Learning: Python, Scikit-learn
